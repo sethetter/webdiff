@@ -1,0 +1,13 @@
+[package]
+name = "webdiff"
+version = "0.1.0"
+authors = ["Seth Etter <mail@sethetter.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+reqwest = { version = "0.10" }
+tokio = { version = "0.2", features = ["full"] }
+scraper = "0.12.0"
+futures = "0.3.5"
