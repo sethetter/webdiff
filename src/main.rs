@@ -2,36 +2,38 @@ use futures::future::try_join_all;
 use simple_error::SimpleError;
 use scraper::{Html, Selector};
 use tokio::time::delay_for;
-use std::time;
-use std::default::Default;
-use serde::Serialize;
+use std::{time, env, default::Default};
+use serde::{Serialize, Deserialize};
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let t1 = Target {
-        uri: "https://reddit.com".to_string(),
-        selector: Some("h3._eYtD2XCVieq6emjKBH3m".to_string()),
-        interval: 1,
-        ..Default::default()
-    };
+    let args: Vec<String> = env::args().collect();
 
-    let t2 = Target {
-        uri: "https://news.ycombinator.com".to_string(),
-        selector: Some("a.storylink".to_string()),
-        interval: 1,
-        ..Default::default()
-    };
+    let config_path = args.get(1).unwrap();
+    let config = parse_config(config_path)?;
 
-    let targets = vec![t1, t2];
-    let tasks: Vec<_> = targets.iter().map(|t| t.watch()).collect();
-
+    let tasks: Vec<_> = config.targets.iter().map(|t| t.watch()).collect();
     try_join_all(tasks).await?;
+
     Ok(())
 }
 
-#[derive(Clone, Serialize)]
+#[derive(Deserialize)]
+struct Config {
+    targets: Vec<Target>,
+}
+
+fn parse_config(fname: &String) -> Result<Config> {
+    let fcontents = std::fs::read_to_string(fname)?;
+    let config: Config = serde_json::from_str(fcontents.as_str()).map_err(|_| {
+        SimpleError::new("failed to parse config")
+    })?;
+    Ok(config)
+}
+
+#[derive(Clone, Serialize, Deserialize)]
 struct Target {
     uri: String,
     interval: u32,

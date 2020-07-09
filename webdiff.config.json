@@ -1,0 +1,14 @@
+{
+  "targets": [
+    {
+      "uri": "https://news.ycombinator.com",
+      "selector": "a.storylink",
+      "interval": 3
+    },
+    {
+      "uri": "https://reddit.com",
+      "selector": "h3._eYtD2XCVieq6emjKBH3m",
+      "interval": 2
+    }
+  ]
+}
